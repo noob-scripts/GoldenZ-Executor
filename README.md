@@ -2,6 +2,11 @@
 This is a new roblox executor that's has a powerful execute, and a backdoor scanner!
 - NOTE: GoldenZ executor injects his own library on the global environment on Roblox!
 
+# get the library:
+```lua
+loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/noob-scripts/GoldenZ-Executor/master/GoldenZ_Library.luau.lua", true), "goldenz")()
+```
+
 # Documentation
 - "goldenz": this is the library of the Executor.
 - the goldenz library is similar to Synapse X Library (syn)
