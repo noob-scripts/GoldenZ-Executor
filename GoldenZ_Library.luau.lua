@@ -58,7 +58,7 @@ goldenz.request = function(Options: table)
     table.insert(Return.Headers, {
         ["User-Agent"] = "goldenz/beta",
         ["GoldenZ-User-Identifier"] = goldenz_hwid,
-        ["GoldenZ-Fingerprint"] = "<???>"
+        ["GoldenZ-Fingerprint"] = "anonymous"
     })
     
     return Return
@@ -618,6 +618,15 @@ getgenv().is_goldenz_function = function(f: function)
     end
 
     return false
+end
+
+goldenz.filtergc = function(filter: string)
+    local s = {}
+    for i, v in pairs(goldenz_getgc(true)) do
+        if v and (type(v) == filter) then
+	    s[i] = v
+	end
+    end
 end
 
 setreadonly(goldenz, true)
