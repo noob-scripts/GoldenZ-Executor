@@ -26,12 +26,9 @@ end)())
 goldenz.request = function(Options: table)
     assert(type(Options) == "table", 'Invalid argument #1 to "goldenz.request" (string expected, got ' .. typeof(Options) .. ')')
     local HttpService = game:GetService("HttpService")
-    if type(Options) ~= "table" then
-        error('invalid argument #1 (table expected, got ' .. typeof(Options) .. ')')
-    end
 
-    local Timeout, Done, Time = 5, false, 0
-    local Return = {
+    local timeout, Done, Time = 5, false, 0
+    local Result = {
         Success = false,
         StatusCode = 200,
         StatusMessage = 'Request Timeout',
@@ -39,29 +36,28 @@ goldenz.request = function(Options: table)
         Cookies = {},
         Body = ''
     }
-    local function Callback(Success, Response)
+    local function callback(Success, Response)
         Done = true
-        Return.Success = Success
-        Return.StatusCode = Response.StatusCode
-        Return.StatusMessage = Response.StatusMessage
-        Return.Headers = Response.Headers
-        Return.Body = Response.Body
+        Result.Success = Success
+        Result.StatusCode = Response.StatusCode
+        Result.StatusMessage = Response.StatusMessage
+        Result.Headers = Response.Headers
+        Result.Body = Response.Body
     end
     
-    HttpService:RequestInternal(Options):Start(Callback)
+    HttpService:RequestInternal(Options):Start(callback)
         
     while not Done and Time < Timeout do
         Time = Time + .1
         task.wait(.1)
     end
 
-    table.insert(Return.Headers, {
-        ["User-Agent"] = "goldenz/beta",
-        ["GoldenZ-User-Identifier"] = goldenz_hwid,
-        ["GoldenZ-Fingerprint"] = "anonymous"
-    })
+    -- theses Headers Modifications can be detected, so, only on GoldenZ it will hook RequestInternal, to prevent anti cheats accessing theses Headers and Url.
+    Result.Headers["User-Agent"] = "goldenz/beta"
+    Result.Headers["GoldenZ-User-Identifier"] = goldenz_hwid
+    Result.Headers["GoldenZ-Fingerprint"] = nil
     
-    return Return
+    return Result
 end
 
 goldenz.protect_gui = function(a: ScreenGui)
