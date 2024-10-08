@@ -7,6 +7,7 @@ getgenv().goldenz = {
     },
     oth = {}
 }
+local hooked_functions = {}
 local protected_guis = {}
 local oldnc; oldnc = hookmetamethod(game, "__namecall", function(...)
     local args = {...}
