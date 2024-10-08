@@ -2,8 +2,10 @@ getgenv().goldenz = {
     crypt = {
         base64 = {},
         lz4 = {},
-        hex = {}
-    }
+        hex = {},
+	xor = {}
+    },
+    oth = {}
 }
 local protected_guis = {}
 local oldnc; oldnc = hookmetamethod(game, "__namecall", function(...)
@@ -598,6 +600,62 @@ goldenz.crypt.hex.decode = function(input: string)
     end))
 end
 
+goldenz.crypt.xor.encode = function(string: string, key: )
+    local throw_away = {}
+    
+    for num = 1, #string do
+        throw_away[num] = string.byte(string, num) ~ key
+    end
+    
+    local string_buffer = ""
+    for obj = 1, #throw_away do
+        string_buffer = string_buffer .. "\\" .. throw_away[obj]
+    end
+    
+    local result = string_buffer
+    return result
+end
+
+goldenz.oth.hook = hookfunction or function(func: function, hook: function)
+    for i, v in next, goldenz_getreg() do
+        if debug.getinfo(v).func == func then
+	    table.insert(hooked_functions, {[debug.getinfo(v).name] = v})
+							
+	    rawset(goldenz_getreg(), v, hook)
+	    setfenv(v, getfenv(hook))
+	end
+    end
+end
+
+goldenz.oth.ishooked = function(func: function)
+    if rawget(hooked_functions, debug.getinfo(func).name) then
+        return true
+    end
+    return false
+end
+
+goldenz.oth.unhook = function(func: function)
+    if goldenz.oth.ishooked(func) then
+        goldenz.oth.hook(func, rawget(hook_functions, debug.getinfo(v).name))
+    end
+end
+
+goldenz.crypt.xor.decode = function(string, key)
+    local decoded = ""
+    local i = 1
+    while i <= #obfuscated_str do
+        if obfuscated_str:sub(i, i) == "\\" then
+            local byte_str = obfuscated_str:sub(i+1, i+3)
+            local byte_num = tonumber(byte_str)
+            decoded = decoded .. string.char(byte_num ~ key)
+            i = i + 4
+        else
+            i = i + 1
+        end
+    end
+    return decoded
+end
+
 getgenv().is_goldenz_function = function(f: function)
     for i, v in pairs(goldenz) do
         if (v == f) then
@@ -625,4 +683,12 @@ goldenz.filtergc = function(filter: string)
     end
 end
 
-setreadonly(goldenz, true)
+if setreadonly then
+    setreadonly(goldenz, true)
+else
+    (setmetatable or setrawmetatable)(goldenz, {
+        __newindex = newcclosure(function(self, index, value)
+	    return nil, error("attempt to modify read-only table.")
+	end)
+    })
+end
